@@ -5,11 +5,9 @@ namespace Database\Seeders;
 use App\Models\Article;
 use App\Models\Tag;
 use App\Models\User;
-use Illuminate\Console\Concerns\InteractsWithIO;
 use Illuminate\Database\Seeder;
 use Illuminate\Foundation\Testing\Concerns\InteractsWithConsole;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Log;
 
 class DatabaseSeeder extends Seeder
 {
