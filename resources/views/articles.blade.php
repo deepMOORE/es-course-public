@@ -1,6 +1,16 @@
 @extends('index')
 
 @section('content')
+    <form action="{{ url('/search') }}" method="POST">
+        @csrf
+        <input
+            style="margin-bottom: 20px; height: 50px; font-size: 20px"
+            type="text"
+            name="searchTerm"
+            placeholder="Type to search . . . "
+            value="{{ request('searchTerm') }}"
+        />
+    </form>
     @foreach($articles as $article)
         <div style="background-color: #d7d7d7; margin-bottom: 20px; border-radius: 10px; padding: 1px 20px 5px 20px">
             <div style="margin-bottom: 7px">

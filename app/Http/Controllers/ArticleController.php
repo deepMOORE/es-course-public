@@ -1,34 +1,62 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Http\Models\ArticleModel;
-use App\Http\Models\TagModel;
+use App\Http\Requests\ArticleSearchRequest;
 use App\Http\Response;
+use App\Mappers\ArticlesMapper;
 use App\Models\Article;
-use App\Models\Tag;
+use App\Repositories\ArticleRepository;
+use App\Repositories\ElasticsearchRepository;
+use Illuminate\Http\Request;
+use JsonMapper;
 
 class ArticleController extends Controller
 {
+    private ArticlesMapper $articlesMapper;
+    private JsonMapper $jsonMapper;
+    private ElasticsearchRepository $elasticsearchRepository;
+    private ArticleRepository $articleRepository;
+
+    public function __construct(
+        ArticlesMapper $articlesMapper,
+        JsonMapper $jsonMapper,
+        ElasticsearchRepository $elasticsearchRepository,
+        ArticleRepository $articleRepository
+    ) {
+        $this->articlesMapper = $articlesMapper;
+        $this->jsonMapper = $jsonMapper;
+        $this->elasticsearchRepository = $elasticsearchRepository;
+        $this->articleRepository = $articleRepository;
+    }
+
     /**
      * Get all articles.
      */
     public function getAll()
     {
-        $articles = Article::query()
-            ->with('tags')
-            ->get()
-            ->map(function (Article $article) {
-                return new ArticleModel(
-                    $article->id,
-                    $article->title,
-                    $article->text,
-                    $article->user_id,
-                    $article->tags->map(
-                        fn (Tag $tag) => new TagModel($tag->id, $tag->title)
-                    )
-                );
-            });
+        $models = $this->articleRepository->getAll();
+
+        $articles = $this->articlesMapper->map($models);
+
+        return Response::successView('articles', [
+            'articles' => $articles
+        ]);
+    }
+
+    /**
+     * Search articles.
+     */
+    public function search(Request $request)
+    {
+        /** @var ArticleSearchRequest $body */
+        $body = $this->jsonMapper->map((object)$request->all(), new ArticleSearchRequest());
+
+        $ids = $this->elasticsearchRepository->search($body->searchTerm);
+
+        $models = $this->articleRepository->getByIds($ids);
+
+        $articles = $this->articlesMapper->map($models);
 
         return Response::successView('articles', [
             'articles' => $articles

@@ -24,6 +24,11 @@ return [
         'token' => env('POSTMARK_TOKEN'),
     ],
 
+    'elasticsearch' => [
+        'enabled' => env('ELASTICSEARCH_ENABLED', false),
+        'host' => env('ELASTICSEARCH_HOSTS', null),
+    ],
+
     'ses' => [
         'key' => env('AWS_ACCESS_KEY_ID'),
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
